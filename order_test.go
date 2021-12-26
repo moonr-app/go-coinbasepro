@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/moonr-app/go-coinbasepro/v2"
+	"github.com/moonr-app/go-coinbasepro"
 )
 
 func TestCreateLimitOrders(t *testing.T) {

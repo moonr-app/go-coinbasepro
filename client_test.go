@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/moonr-app/go-coinbasepro/v2"
+	"github.com/moonr-app/go-coinbasepro"
 )
 
 func TestClientErrorsOnNotFound(t *testing.T) {

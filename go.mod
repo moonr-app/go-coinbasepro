@@ -1,4 +1,4 @@
-module github.com/moonr-app/go-coinbasepro/v2
+module github.com/moonr-app/go-coinbasepro
 
 go 1.17
 
