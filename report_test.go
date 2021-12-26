@@ -1,31 +1,31 @@
-package coinbasepro
+package coinbasepro_test
 
 import (
-	"errors"
+	"context"
 	"testing"
 	"time"
+
+	"github.com/moonr-app/go-coinbasepro/v2"
 )
 
 func TestCreateReportAndStatus(t *testing.T) {
-	// # DISABLED in sandbox
-	return
-	client := NewTestClient()
-	newReport := Report{
-		Type:      "fill",
+	client := coinbasepro.NewTestClient(t)
+	ctx := context.Background()
+
+	newReport := coinbasepro.Report{
+		Type:      "fills",
+		ProductID: "ALL",
 		StartDate: time.Now().Add(-24 * 4 * time.Hour),
 		EndDate:   time.Now().Add(-24 * 2 * time.Hour),
 	}
 
-	report, err := client.CreateReport(&newReport)
+	report, err := client.CreateReport(ctx, newReport)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
-	currentReport, err := client.GetReportStatus(report.ID)
+	_, err = client.GetReportStatus(ctx, report.ID)
 	if err != nil {
-		t.Error(err)
-	}
-	if StructHasZeroValues(currentReport) {
-		t.Error(errors.New("Zero value"))
+		t.Fatal(err)
 	}
 }

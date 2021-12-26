@@ -1,8 +1,10 @@
 package coinbasepro
 
 import (
+	"context"
 	"database/sql/driver"
 	"fmt"
+	"net/http"
 	"strings"
 	"time"
 )
@@ -12,11 +14,11 @@ type ServerTime struct {
 	Epoch float64 `json:"epoch,number"`
 }
 
-func (c *Client) GetTime() (ServerTime, error) {
+func (c *client) GetTime(ctx context.Context) (ServerTime, error) {
 	var serverTime ServerTime
 
 	url := fmt.Sprintf("/time")
-	_, err := c.Request("GET", url, nil, &serverTime)
+	_, err := c.Request(ctx, http.MethodGet, url, nil, &serverTime)
 	return serverTime, err
 }
 

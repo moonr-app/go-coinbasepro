@@ -2,19 +2,26 @@ package coinbasepro
 
 import (
 	"fmt"
+	"os"
 	"reflect"
+	"testing"
 
 	ws "github.com/gorilla/websocket"
 )
 
-func NewTestClient() *Client {
-	client := NewClient()
-	client.UpdateConfig(&ClientConfig{
-		BaseURL: "https://api-public.sandbox.pro.coinbase.com",
-	})
-	client.RetryCount = 2
+func NewTestClient(t *testing.T) *client {
+	c, err := NewClient(
+		os.Getenv("COINBASE_PRO_KEY"),
+		os.Getenv("COINBASE_PRO_PASSPHRASE"),
+		os.Getenv("COINBASE_PRO_SECRET"),
+		WithSandboxEnvironment(),
+		WithRetryCount(2),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	return client
+	return c
 }
 
 func NewTestWebsocketClient() (*ws.Conn, error) {
@@ -26,8 +33,6 @@ func NewTestWebsocketClient() (*ws.Conn, error) {
 
 func StructHasZeroValues(i interface{}) bool {
 	iv := reflect.ValueOf(i)
-
-	//values := make([]interface{}, v.NumField())
 
 	for i := 0; i < iv.NumField(); i++ {
 		field := iv.Field(i)

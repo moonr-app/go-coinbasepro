@@ -1,18 +1,16 @@
-package coinbasepro
+package coinbasepro_test
 
 import (
-	"errors"
+	"context"
 	"testing"
+
+	"github.com/moonr-app/go-coinbasepro/v2"
 )
 
 func TestGetFees(t *testing.T) {
-	client := NewTestClient()
-	fees, err := client.GetFees()
+	client := coinbasepro.NewTestClient(t)
+	_, err := client.GetFees(context.Background())
 	if err != nil {
-		t.Error(err)
-	}
-
-	if StructHasZeroValues(fees) {
-		t.Error(errors.New("Zero value"))
+		t.Fatal(err)
 	}
 }

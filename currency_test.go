@@ -1,20 +1,22 @@
-package coinbasepro
+package coinbasepro_test
 
 import (
-	"errors"
+	"context"
 	"testing"
+
+	"github.com/moonr-app/go-coinbasepro/v2"
 )
 
 func TestGetCurrencies(t *testing.T) {
-	client := NewTestClient()
-	currencies, err := client.GetCurrencies()
+	client := coinbasepro.NewTestClient(t)
+	currencies, err := client.GetCurrencies(context.Background())
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	for _, c := range currencies {
-		if StructHasZeroValues(c) {
-			t.Error(errors.New("Zero value"))
+		if coinbasepro.StructHasZeroValues(c) {
+			t.Fatal("Zero value")
 		}
 	}
 }
