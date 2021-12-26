@@ -75,7 +75,7 @@ func TestCreateProfileTransfer(t *testing.T) {
 		Amount:   "9.99",
 	}
 
-	err = client.CreateProfileTransfer(ctx, &newTransfer)
+	err = client.CreateProfileTransfer(ctx, newTransfer)
 	if err != nil {
 		t.Fatal(err)
 	}

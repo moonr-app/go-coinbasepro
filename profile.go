@@ -43,7 +43,7 @@ func (c *client) GetProfile(ctx context.Context, id string) (Profile, error) {
 }
 
 // CreateProfileTransfer transfers a currency amount from one profile to another
-func (c *client) CreateProfileTransfer(ctx context.Context, newTransfer *ProfileTransfer) error {
+func (c *client) CreateProfileTransfer(ctx context.Context, newTransfer ProfileTransfer) error {
 	url := fmt.Sprintf("/profiles/transfer")
 	_, err := c.Request(ctx, http.MethodPost, url, newTransfer, nil)
 
