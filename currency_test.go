@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/preichenberger/go-coinbasepro/v2"
+	"github.com/moonr-app/go-coinbasepro/v2"
 )
 
 func TestGetCurrencies(t *testing.T) {

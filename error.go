@@ -1,8 +1,12 @@
 package coinbasepro
 
+import "errors"
+
 var (
 	ErrNotFound     = Error{Message: "Route not found"}
 	ErrUnauthorized = Error{Message: "Unauthorized."}
+
+	ErrCloseWebsocket = errors.New("close webscoket connection")
 )
 
 type Error struct {

@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/preichenberger/go-coinbasepro/v2"
+	"github.com/moonr-app/go-coinbasepro/v2"
 )
 
 func TestGetTime(t *testing.T) {

@@ -1,4 +1,4 @@
-Go Coinbase Pro [![GoDoc](http://img.shields.io/badge/godoc-reference-blue.svg)](http://godoc.org/github.com/preichenberger/go-coinbasepro) [![Build Status](https://travis-ci.org/preichenberger/go-coinbasepro.svg?branch=master)](https://travis-ci.org/preichenberger/go-coinbasepro)
+Go Coinbase Pro [![GoDoc](http://img.shields.io/badge/godoc-reference-blue.svg)](http://godoc.org/github.com/moonr-app/go-coinbasepro) [![Build Status](https://travis-ci.org/moonr-app/go-coinbasepro.svg?branch=master)](https://travis-ci.org/moonr-app/go-coinbasepro)
 ========
 
 ## Summary
@@ -13,27 +13,27 @@ go mod init github.com/yourusername/yourprojectname
 
 ### Older Go versions
 ```sh
-go get github.com/preichenberger/go-coinbasepro
+go get github.com/moonr-app/go-coinbasepro
 ```
 
 ### Significant releases
 Use [dep](https://github.com/golang/dep) to install previous releases
 ```sh
-dep ensure --add github.com/preichenberger/go-gdax@0.5.7
+dep ensure --add github.com/moonr-app/go-gdax@0.5.7
 ```
 
 - 0.5.7, last release before rename package to: coinbasepro
 - 0.5, as of 0.5 this library uses strings and is not backwards compatible
 
 ## Documentation
-For full details on functionality, see [GoDoc](http://godoc.org/github.com/preichenberger/go-coinbasepro) documentation.
+For full details on functionality, see [GoDoc](http://godoc.org/github.com/moonr-app/go-coinbasepro) documentation.
 
 ### Setup
 Client will respect environment variables: COINBASE_PRO_BASEURL, COINBASE_PRO_PASSPHRASE, COINBASE_PRO_KEY, COINBASE_PRO_SECRET by default
 
 ```go
 import (
-  coinbasepro "github.com/preichenberger/go-coinbasepro/v2"
+  coinbasepro "github.com/moonr-app/go-coinbasepro/v2"
 )
 
 client := coinbasepro.NewClient()
@@ -187,7 +187,7 @@ Results return coinbase time type which handles different types of time parsing 
 ```go
   import(
     "time"
-    coinbasepro "github.com/preichenberger/go-coinbasepro/v2"
+    coinbasepro "github.com/moonr-app/go-coinbasepro/v2"
   )
 
   coinbaseTime := coinbasepro.Time{}

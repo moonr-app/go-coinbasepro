@@ -5,7 +5,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/preichenberger/go-coinbasepro/v2"
+	"github.com/moonr-app/go-coinbasepro/v2"
 )
 
 func TestGetProducts(t *testing.T) {

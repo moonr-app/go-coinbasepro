@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/preichenberger/go-coinbasepro/v2"
+	"github.com/moonr-app/go-coinbasepro/v2"
 )
 
 func TestCreateReportAndStatus(t *testing.T) {

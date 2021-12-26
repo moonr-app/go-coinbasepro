@@ -9,8 +9,6 @@ import (
 	ws "github.com/gorilla/websocket"
 )
 
-var ErrCloseWebsocket = errors.New("close webscoket connection")
-
 type Message struct {
 	Type          string           `json:"type"`
 	ProductID     string           `json:"product_id"`
