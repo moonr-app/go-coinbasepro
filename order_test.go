@@ -6,7 +6,7 @@ import (
 )
 
 func TestCreateLimitOrders(t *testing.T) {
-	client := NewTestClient()
+	client := NewTestClient(t)
 
 	order := Order{
 		Price:     "1.00000000",
@@ -36,7 +36,7 @@ func TestCreateLimitOrders(t *testing.T) {
 }
 
 func TestCreateMarketOrders(t *testing.T) {
-	client := NewTestClient()
+	client := NewTestClient(t)
 
 	order := Order{
 		Funds:     "10.00",
@@ -63,7 +63,7 @@ func TestCreateMarketOrders(t *testing.T) {
 }
 
 func TestCancelOrder(t *testing.T) {
-	client := NewTestClient()
+	client := NewTestClient(t)
 
 	order := Order{
 		Price:     "1.00",
@@ -84,7 +84,7 @@ func TestCancelOrder(t *testing.T) {
 }
 
 func TestGetOrder(t *testing.T) {
-	client := NewTestClient()
+	client := NewTestClient(t)
 
 	order := Order{
 		Price:     "1.00",
@@ -113,7 +113,7 @@ func TestGetOrder(t *testing.T) {
 }
 
 func TestListOrders(t *testing.T) {
-	client := NewTestClient()
+	client := NewTestClient(t)
 	cursor := client.ListOrders()
 	var orders []Order
 
@@ -144,7 +144,7 @@ func TestListOrders(t *testing.T) {
 }
 
 func TestCancelAllOrders(t *testing.T) {
-	client := NewTestClient()
+	client := NewTestClient(t)
 
 	for _, pair := range []string{"BTC-USD"} {
 		for i := 0; i < 2; i++ {

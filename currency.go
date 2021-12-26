@@ -10,7 +10,7 @@ type Currency struct {
 	MinSize string `json:"min_size"`
 }
 
-func (c *Client) GetCurrencies() ([]Currency, error) {
+func (c *client) GetCurrencies() ([]Currency, error) {
 	var currencies []Currency
 
 	url := fmt.Sprintf("/currencies")

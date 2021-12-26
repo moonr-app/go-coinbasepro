@@ -170,7 +170,7 @@ func (e *HistoricRate) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (c *Client) GetBook(product string, level int) (Book, error) {
+func (c *client) GetBook(product string, level int) (Book, error) {
 	var book Book
 
 	requestURL := fmt.Sprintf("/products/%s/book?level=%d", product, level)
@@ -178,7 +178,7 @@ func (c *Client) GetBook(product string, level int) (Book, error) {
 	return book, err
 }
 
-func (c *Client) GetTicker(product string) (Ticker, error) {
+func (c *client) GetTicker(product string) (Ticker, error) {
 	var ticker Ticker
 
 	requestURL := fmt.Sprintf("/products/%s/ticker", product)
@@ -186,7 +186,7 @@ func (c *Client) GetTicker(product string) (Ticker, error) {
 	return ticker, err
 }
 
-func (c *Client) ListTrades(product string,
+func (c *client) ListTrades(product string,
 	p ...ListTradesParams) *Cursor {
 	paginationParams := PaginationParams{}
 	if len(p) > 0 {
@@ -197,7 +197,7 @@ func (c *Client) ListTrades(product string,
 		&paginationParams)
 }
 
-func (c *Client) GetProducts() ([]Product, error) {
+func (c *client) GetProducts() ([]Product, error) {
 	var products []Product
 
 	requestURL := fmt.Sprintf("/products")
@@ -205,7 +205,7 @@ func (c *Client) GetProducts() ([]Product, error) {
 	return products, err
 }
 
-func (c *Client) GetHistoricRates(product string,
+func (c *client) GetHistoricRates(product string,
 	p ...GetHistoricRatesParams) ([]HistoricRate, error) {
 	var historicRates []HistoricRate
 	requestURL := fmt.Sprintf("/products/%s/candles", product)
@@ -237,7 +237,7 @@ func (c *Client) GetHistoricRates(product string,
 	return historicRates, err
 }
 
-func (c *Client) GetStats(product string) (Stats, error) {
+func (c *client) GetStats(product string) (Stats, error) {
 	var stats Stats
 	requestURL := fmt.Sprintf("/products/%s/stats", product)
 	_, err := c.Request("GET", requestURL, nil, &stats)

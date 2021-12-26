@@ -10,7 +10,7 @@ type Transfer struct {
 	CoinbaseAccountID string `json:"coinbase_account_id,string"`
 }
 
-func (c *Client) CreateTransfer(newTransfer *Transfer) (Transfer, error) {
+func (c *client) CreateTransfer(newTransfer *Transfer) (Transfer, error) {
 	var savedTransfer Transfer
 
 	url := fmt.Sprintf("/transfers")

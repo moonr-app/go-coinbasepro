@@ -6,92 +6,68 @@ import (
 	"fmt"
 	"math"
 	"net/http"
-	"os"
 	"strconv"
 	"time"
 )
 
-type Client struct {
-	BaseURL    string
-	Secret     string
-	Key        string
-	Passphrase string
-	HTTPClient *http.Client
-	RetryCount int
+const (
+	baseURLProduction = "https://api.pro.coinbase.com"
+	baseURLSandbox    = "https://api-public.sandbox.pro.coinbase.com"
+)
+
+type (
+	client struct {
+		baseURL           string
+		secret            string
+		key               string
+		passphrase        string
+		httpClient        *http.Client
+		retryCount        int
+		retryInterval     time.Duration
+		timeOffsetSeconds int
+	}
+	option func(*client) error
+)
+
+func NewClient(key, passphrase, secret string, opts ...option) (*client, error) {
+	c := &client{
+		baseURL:           baseURLProduction,
+		key:               key,
+		passphrase:        passphrase,
+		secret:            secret,
+		httpClient:        &http.Client{Timeout: 15 * time.Second},
+		retryCount:        0,
+		retryInterval:     100 * time.Millisecond,
+		timeOffsetSeconds: 0,
+	}
+
+	for _, opt := range opts {
+		if err := opt(c); err != nil {
+			return nil, err
+		}
+	}
+
+	return c, nil
 }
 
-type ClientConfig struct {
-	BaseURL    string
-	Key        string
-	Passphrase string
-	Secret     string
-}
-
-func NewClient() *Client {
-	baseURL := os.Getenv("COINBASE_PRO_BASEURL")
-	if baseURL == "" {
-		baseURL = "https://api.pro.coinbase.com"
-	}
-
-	client := Client{
-		BaseURL:    baseURL,
-		Key:        os.Getenv("COINBASE_PRO_KEY"),
-		Passphrase: os.Getenv("COINBASE_PRO_PASSPHRASE"),
-		Secret:     os.Getenv("COINBASE_PRO_SECRET"),
-		HTTPClient: &http.Client{
-			Timeout: 15 * time.Second,
-		},
-		RetryCount: 0,
-	}
-
-	if os.Getenv("COINBASE_PRO_SANDBOX") == "1" {
-		client.UpdateConfig(&ClientConfig{
-			BaseURL: "https://api-public.sandbox.pro.coinbase.com",
-		})
-	}
-
-	return &client
-}
-
-func (c *Client) UpdateConfig(config *ClientConfig) {
-	baseURL := config.BaseURL
-	key := config.Key
-	passphrase := config.Passphrase
-	secret := config.Secret
-
-	if baseURL != "" {
-		c.BaseURL = baseURL
-	}
-	if key != "" {
-		c.Key = key
-	}
-	if passphrase != "" {
-		c.Passphrase = passphrase
-	}
-	if secret != "" {
-		c.Secret = secret
-	}
-}
-
-func (c *Client) Request(method string, url string,
+func (c *client) Request(method string, url string,
 	params, result interface{}) (res *http.Response, err error) {
-	for i := 0; i < c.RetryCount+1; i++ {
-		retryDuration := time.Duration((math.Pow(2, float64(i))-1)/2*1000) * time.Millisecond
+	for i := 0; i < c.retryCount+1; i++ {
+		retryDuration := time.Duration((math.Pow(2, float64(i))-1)/2) * c.retryInterval
 		time.Sleep(retryDuration)
 
 		res, err = c.request(method, url, params, result)
 		if res != nil && res.StatusCode == 429 {
 			continue
-		} else {
-			break
 		}
+
+		break
 	}
 
 	return res, err
 }
 
-func (c *Client) request(method string, url string,
-	params, result interface{}) (res *http.Response, err error) {
+func (c *client) request(method string, url string, params, result interface{}) (res *http.Response, err error) {
 	var data []byte
 	body := bytes.NewReader(make([]byte, 0))
 
@@ -104,27 +80,17 @@ func (c *Client) request(method string, url string,
 		body = bytes.NewReader(data)
 	}
 
-	fullURL := fmt.Sprintf("%s%s", c.BaseURL, url)
+	fullURL := fmt.Sprintf("%s%s", c.baseURL, url)
 	req, err := http.NewRequest(method, fullURL, body)
 	if err != nil {
 		return res, err
 	}
 
-	timestamp := strconv.FormatInt(time.Now().Unix(), 10)
-
-	// XXX: Sandbox time is off right now
-	if os.Getenv("TEST_COINBASE_OFFSET") != "" {
-		inc, err := strconv.Atoi(os.Getenv("TEST_COINBASE_OFFSET"))
-		if err != nil {
-			return res, err
-		}
-
-		timestamp = strconv.FormatInt(time.Now().Unix()+int64(inc), 10)
-	}
+	timestamp := strconv.FormatInt(time.Now().Unix()+int64(c.timeOffsetSeconds), 10)
 
 	req.Header.Add("Accept", "application/json")
 	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("User-Agent", "Go Coinbase Pro Client 1.0")
+	req.Header.Add("User-Agent", "Go Coinbase Pro httpClient 1.0")
 
 	h, err := c.Headers(method, url, timestamp, string(data))
 	if err != nil {
@@ -135,14 +101,13 @@ func (c *Client) request(method string, url string,
 		req.Header.Add(k, v)
 	}
 
-	res, err = c.HTTPClient.Do(req)
+	res, err = c.httpClient.Do(req)
 	if err != nil {
 		return res, err
 	}
 	defer res.Body.Close()
 
 	if res.StatusCode != 200 {
-		defer res.Body.Close()
 		coinbaseError := Error{}
 		decoder := json.NewDecoder(res.Body)
 		if err := decoder.Decode(&coinbaseError); err != nil {
@@ -163,10 +128,10 @@ func (c *Client) request(method string, url string,
 }
 
 // Headers generates a map that can be used as headers to authenticate a request
-func (c *Client) Headers(method, url, timestamp, data string) (map[string]string, error) {
+func (c *client) Headers(method, url, timestamp, data string) (map[string]string, error) {
 	h := make(map[string]string)
-	h["CB-ACCESS-KEY"] = c.Key
-	h["CB-ACCESS-PASSPHRASE"] = c.Passphrase
+	h["CB-ACCESS-KEY"] = c.key
+	h["CB-ACCESS-PASSPHRASE"] = c.passphrase
 	h["CB-ACCESS-TIMESTAMP"] = timestamp
 
 	message := fmt.Sprintf(
@@ -177,7 +142,7 @@ func (c *Client) Headers(method, url, timestamp, data string) (map[string]string
 		data,
 	)
 
-	sig, err := generateSig(message, c.Secret)
+	sig, err := generateSig(message, c.secret)
 	if err != nil {
 		return nil, err
 	}

@@ -3,16 +3,22 @@ package coinbasepro
 import (
 	"fmt"
 	"reflect"
+	"testing"
 
 	ws "github.com/gorilla/websocket"
 )
 
-func NewTestClient() *Client {
-	client := NewClient()
-	client.UpdateConfig(&ClientConfig{
-		BaseURL: "https://api-public.sandbox.pro.coinbase.com",
-	})
-	client.RetryCount = 2
+func NewTestClient(t *testing.T) *client {
+	client, err := NewClient(
+		"",
+		"",
+		"",
+		WithSandboxEnvironment(),
+		WithRetryCount(2),
+	)
+	if err != nil {
+		t.Error(err)
+	}
 
 	return client
 }

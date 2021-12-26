@@ -10,7 +10,7 @@ type Fees struct {
 	USDVolume    string `json:"usd_volume"`
 }
 
-func (c *Client) GetFees() (Fees, error) {
+func (c *client) GetFees() (Fees, error) {
 	var fees Fees
 
 	url := fmt.Sprintf("/fees")

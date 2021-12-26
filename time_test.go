@@ -8,7 +8,7 @@ import (
 )
 
 func TestGetTime(t *testing.T) {
-	client := NewTestClient()
+	client := NewTestClient(t)
 	serverTime, err := client.GetTime()
 	if err != nil {
 		t.Error(err)

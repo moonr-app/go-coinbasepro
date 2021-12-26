@@ -9,7 +9,7 @@ import (
 func TestCreateReportAndStatus(t *testing.T) {
 	// # DISABLED in sandbox
 	return
-	client := NewTestClient()
+	client := NewTestClient(t)
 	newReport := Report{
 		Type:      "fill",
 		StartDate: time.Now().Add(-24 * 4 * time.Hour),

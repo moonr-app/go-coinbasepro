@@ -43,7 +43,7 @@ type ListOrdersParams struct {
 	Pagination PaginationParams
 }
 
-func (c *Client) CreateOrder(newOrder *Order) (Order, error) {
+func (c *client) CreateOrder(newOrder *Order) (Order, error) {
 	var savedOrder Order
 
 	if len(newOrder.Type) == 0 {
@@ -55,13 +55,13 @@ func (c *Client) CreateOrder(newOrder *Order) (Order, error) {
 	return savedOrder, err
 }
 
-func (c *Client) CancelOrder(id string) error {
+func (c *client) CancelOrder(id string) error {
 	url := fmt.Sprintf("/orders/%s", id)
 	_, err := c.Request("DELETE", url, nil, nil)
 	return err
 }
 
-func (c *Client) CancelAllOrders(p ...CancelAllOrdersParams) ([]string, error) {
+func (c *client) CancelAllOrders(p ...CancelAllOrdersParams) ([]string, error) {
 	var orderIDs []string
 	url := "/orders"
 
@@ -73,7 +73,7 @@ func (c *Client) CancelAllOrders(p ...CancelAllOrdersParams) ([]string, error) {
 	return orderIDs, err
 }
 
-func (c *Client) GetOrder(id string) (Order, error) {
+func (c *client) GetOrder(id string) (Order, error) {
 	var savedOrder Order
 
 	url := fmt.Sprintf("/orders/%s", id)
@@ -81,7 +81,7 @@ func (c *Client) GetOrder(id string) (Order, error) {
 	return savedOrder, err
 }
 
-func (c *Client) ListOrders(p ...ListOrdersParams) *Cursor {
+func (c *client) ListOrders(p ...ListOrdersParams) *Cursor {
 	paginationParams := PaginationParams{}
 	if len(p) > 0 {
 		paginationParams = p[0].Pagination

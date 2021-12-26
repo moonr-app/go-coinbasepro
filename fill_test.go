@@ -7,7 +7,7 @@ import (
 
 func TestListFills(t *testing.T) {
 	var fills []Fill
-	client := NewTestClient()
+	client := NewTestClient(t)
 	params := ListFillsParams{
 		ProductID: "BTC-USD",
 	}

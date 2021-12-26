@@ -13,7 +13,7 @@ type Deposit struct {
 	PayoutAt Time   `json:"payout_at,string,omitempty"`
 }
 
-func (c *Client) CreateDeposit(newDeposit *Deposit) (Deposit, error) {
+func (c *client) CreateDeposit(newDeposit *Deposit) (Deposit, error) {
 	var savedDeposit Deposit
 
 	url := fmt.Sprintf("/deposits/payment-method")
@@ -27,7 +27,7 @@ type PaymentMethod struct {
 	ID       string `json:"id"`
 }
 
-func (c *Client) GetPaymentMethods() ([]PaymentMethod, error) {
+func (c *client) GetPaymentMethods() ([]PaymentMethod, error) {
 	var paymentMethods []PaymentMethod
 
 	url := fmt.Sprintf("/payment-methods")

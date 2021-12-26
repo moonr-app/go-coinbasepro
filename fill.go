@@ -23,7 +23,7 @@ type ListFillsParams struct {
 	Pagination PaginationParams
 }
 
-func (c *Client) ListFills(p ListFillsParams) *Cursor {
+func (c *client) ListFills(p ListFillsParams) *Cursor {
 	paginationParams := p.Pagination
 	if p.OrderID != "" {
 		paginationParams.AddExtraParam("order_id", p.OrderID)

@@ -12,7 +12,7 @@ type ServerTime struct {
 	Epoch float64 `json:"epoch,number"`
 }
 
-func (c *Client) GetTime() (ServerTime, error) {
+func (c *client) GetTime() (ServerTime, error) {
 	var serverTime ServerTime
 
 	url := fmt.Sprintf("/time")

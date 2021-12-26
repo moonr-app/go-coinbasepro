@@ -6,7 +6,7 @@ import (
 )
 
 func TestGetFees(t *testing.T) {
-	client := NewTestClient()
+	client := NewTestClient(t)
 	fees, err := client.GetFees()
 	if err != nil {
 		t.Error(err)

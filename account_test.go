@@ -6,7 +6,7 @@ import (
 )
 
 func TestGetAccounts(t *testing.T) {
-	client := NewTestClient()
+	client := NewTestClient(t)
 	accounts, err := client.GetAccounts()
 	if err != nil {
 		t.Error(err)
@@ -21,7 +21,7 @@ func TestGetAccounts(t *testing.T) {
 }
 
 func TestGetAccount(t *testing.T) {
-	client := NewTestClient()
+	client := NewTestClient(t)
 	accounts, err := client.GetAccounts()
 	if err != nil {
 		t.Error(err)
@@ -41,7 +41,7 @@ func TestGetAccount(t *testing.T) {
 }
 func TestListAccountLedger(t *testing.T) {
 	var ledgers []LedgerEntry
-	client := NewTestClient()
+	client := NewTestClient(t)
 	accounts, err := client.GetAccounts()
 	if err != nil {
 		t.Error(err)
@@ -72,7 +72,7 @@ func TestListAccountLedger(t *testing.T) {
 
 func TestListHolds(t *testing.T) {
 	var holds []Hold
-	client := NewTestClient()
+	client := NewTestClient(t)
 	accounts, err := client.GetAccounts()
 	if err != nil {
 		t.Error(err)

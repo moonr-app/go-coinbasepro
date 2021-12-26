@@ -5,7 +5,7 @@ import (
 )
 
 type Cursor struct {
-	Client     *Client
+	Client     *client
 	Pagination *PaginationParams
 	Method     string
 	Params     interface{}
@@ -13,7 +13,7 @@ type Cursor struct {
 	HasMore    bool
 }
 
-func NewCursor(client *Client, method, url string,
+func NewCursor(client *client, method, url string,
 	paginationParams *PaginationParams) *Cursor {
 	return &Cursor{
 		Client:     client,

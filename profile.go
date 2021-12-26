@@ -20,10 +20,10 @@ type ProfileTransfer struct {
 	Amount   string `json:"amount"`
 }
 
-// Client Funcs
+// httpClient Funcs
 
 // GetProfiles retrieves a list of profiles
-func (c *Client) GetProfiles() ([]Profile, error) {
+func (c *client) GetProfiles() ([]Profile, error) {
 	var profiles []Profile
 
 	url := fmt.Sprintf("/profiles")
@@ -32,7 +32,7 @@ func (c *Client) GetProfiles() ([]Profile, error) {
 }
 
 // GetProfile retrieves a single profile
-func (c *Client) GetProfile(id string) (Profile, error) {
+func (c *client) GetProfile(id string) (Profile, error) {
 	var profile Profile
 
 	url := fmt.Sprintf("/profiles/%s", id)
@@ -41,7 +41,7 @@ func (c *Client) GetProfile(id string) (Profile, error) {
 }
 
 // CreateProfileTransfer transfers a currency amount from one profile to another
-func (c *Client) CreateProfileTransfer(newTransfer *ProfileTransfer) error {
+func (c *client) CreateProfileTransfer(newTransfer *ProfileTransfer) error {
 	url := fmt.Sprintf("/profiles/transfer")
 	_, err := c.Request("POST", url, newTransfer, nil)
 

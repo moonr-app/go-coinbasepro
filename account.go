@@ -48,15 +48,15 @@ type ListHoldsParams struct {
 	Pagination PaginationParams
 }
 
-// Client Funcs
-func (c *Client) GetAccounts() ([]Account, error) {
+// httpClient Funcs
+func (c *client) GetAccounts() ([]Account, error) {
 	var accounts []Account
 	_, err := c.Request("GET", "/accounts", nil, &accounts)
 
 	return accounts, err
 }
 
-func (c *Client) GetAccount(id string) (Account, error) {
+func (c *client) GetAccount(id string) (Account, error) {
 	account := Account{}
 
 	url := fmt.Sprintf("/accounts/%s", id)
@@ -64,7 +64,7 @@ func (c *Client) GetAccount(id string) (Account, error) {
 	return account, err
 }
 
-func (c *Client) ListAccountLedger(id string,
+func (c *client) ListAccountLedger(id string,
 	p ...GetAccountLedgerParams) *Cursor {
 	paginationParams := PaginationParams{}
 	if len(p) > 0 {
@@ -75,7 +75,7 @@ func (c *Client) ListAccountLedger(id string,
 		&paginationParams)
 }
 
-func (c *Client) ListHolds(id string, p ...ListHoldsParams) *Cursor {
+func (c *client) ListHolds(id string, p ...ListHoldsParams) *Cursor {
 	paginationParams := PaginationParams{}
 	if len(p) > 0 {
 		paginationParams = p[0].Pagination

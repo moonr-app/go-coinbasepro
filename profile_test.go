@@ -7,7 +7,7 @@ import (
 )
 
 func TestGetProfiles(t *testing.T) {
-	client := NewTestClient()
+	client := NewTestClient(t)
 	profiles, err := client.GetProfiles()
 	if err != nil {
 		t.Error(err)
@@ -21,7 +21,7 @@ func TestGetProfiles(t *testing.T) {
 }
 
 func TestGetProfile(t *testing.T) {
-	client := NewTestClient()
+	client := NewTestClient(t)
 	profiles, err := client.GetProfiles()
 	if err != nil {
 		t.Error(err)
@@ -38,7 +38,7 @@ func TestGetProfile(t *testing.T) {
 }
 
 func TestCreateProfileTransfer(t *testing.T) {
-	client := NewTestClient()
+	client := NewTestClient(t)
 	profiles, err := client.GetProfiles()
 	if err != nil {
 		t.Error(err)

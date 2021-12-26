@@ -6,7 +6,7 @@ import (
 )
 
 func TestGetProducts(t *testing.T) {
-	client := NewTestClient()
+	client := NewTestClient(t)
 	products, err := client.GetProducts()
 	if err != nil {
 		t.Error(err)
@@ -20,7 +20,7 @@ func TestGetProducts(t *testing.T) {
 }
 
 func TestGetBook(t *testing.T) {
-	client := NewTestClient()
+	client := NewTestClient(t)
 	_, err := client.GetBook("BTC-USD", 1)
 	if err != nil {
 		t.Error(err)
@@ -36,7 +36,7 @@ func TestGetBook(t *testing.T) {
 }
 
 func TestGetTicker(t *testing.T) {
-	client := NewTestClient()
+	client := NewTestClient(t)
 	ticker, err := client.GetTicker("BTC-USD")
 	if err != nil {
 		t.Error(err)
@@ -59,7 +59,7 @@ func TestGetTicker(t *testing.T) {
 
 func TestListTrades(t *testing.T) {
 	var trades []Trade
-	client := NewTestClient()
+	client := NewTestClient(t)
 	cursor := client.ListTrades("BTC-USD")
 
 	if err := cursor.NextPage(&trades); err != nil {
@@ -76,7 +76,7 @@ func TestListTrades(t *testing.T) {
 func TestGetHistoricRates(t *testing.T) {
 	// Disabled due to error on sandbox
 	return
-	client := NewTestClient()
+	client := NewTestClient(t)
 	params := GetHistoricRatesParams{
 		Granularity: 3600,
 	}
@@ -93,7 +93,7 @@ func TestGetHistoricRates(t *testing.T) {
 }
 
 func TestGetStats(t *testing.T) {
-	client := NewTestClient()
+	client := NewTestClient(t)
 	stats, err := client.GetStats("BTC-USD")
 	if err != nil {
 		t.Error(err)

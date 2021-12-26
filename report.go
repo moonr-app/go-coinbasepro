@@ -28,7 +28,7 @@ type Report struct {
 	EndDate     time.Time
 }
 
-func (c *Client) CreateReport(newReport *Report) (Report, error) {
+func (c *client) CreateReport(newReport *Report) (Report, error) {
 	var savedReport Report
 
 	url := fmt.Sprintf("/reports")
@@ -37,7 +37,7 @@ func (c *Client) CreateReport(newReport *Report) (Report, error) {
 	return savedReport, err
 }
 
-func (c *Client) GetReportStatus(id string) (Report, error) {
+func (c *client) GetReportStatus(id string) (Report, error) {
 	report := Report{}
 
 	url := fmt.Sprintf("/reports/%s", id)
