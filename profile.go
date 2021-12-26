@@ -1,7 +1,9 @@
 package coinbasepro
 
 import (
+	"context"
 	"fmt"
+	"net/http"
 )
 
 type Profile struct {
@@ -23,27 +25,27 @@ type ProfileTransfer struct {
 // httpClient Funcs
 
 // GetProfiles retrieves a list of profiles
-func (c *client) GetProfiles() ([]Profile, error) {
+func (c *client) GetProfiles(ctx context.Context) ([]Profile, error) {
 	var profiles []Profile
 
 	url := fmt.Sprintf("/profiles")
-	_, err := c.Request("GET", url, nil, &profiles)
+	_, err := c.Request(ctx, http.MethodGet, url, nil, &profiles)
 	return profiles, err
 }
 
 // GetProfile retrieves a single profile
-func (c *client) GetProfile(id string) (Profile, error) {
+func (c *client) GetProfile(ctx context.Context, id string) (Profile, error) {
 	var profile Profile
 
 	url := fmt.Sprintf("/profiles/%s", id)
-	_, err := c.Request("GET", url, nil, &profile)
+	_, err := c.Request(ctx, http.MethodGet, url, nil, &profile)
 	return profile, err
 }
 
 // CreateProfileTransfer transfers a currency amount from one profile to another
-func (c *client) CreateProfileTransfer(newTransfer *ProfileTransfer) error {
+func (c *client) CreateProfileTransfer(ctx context.Context, newTransfer *ProfileTransfer) error {
 	url := fmt.Sprintf("/profiles/transfer")
-	_, err := c.Request("POST", url, newTransfer, nil)
+	_, err := c.Request(ctx, http.MethodPost, url, newTransfer, nil)
 
 	return err
 }

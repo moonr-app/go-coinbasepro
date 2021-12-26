@@ -1,14 +1,17 @@
-package coinbasepro
+package coinbasepro_test
 
 import (
-	"errors"
+	"context"
+	"net/http"
 	"testing"
+
+	"github.com/preichenberger/go-coinbasepro/v2"
 )
 
 func TestClientErrorsOnNotFound(t *testing.T) {
-	client := NewTestClient(t)
-	_, err := client.Request("GET", "/fake", nil, nil)
-	if err == nil {
-		t.Error(errors.New("Should have thrown 404 error"))
+	client := coinbasepro.NewTestClient(t)
+	_, err := client.Request(context.Background(), http.MethodGet, "/fake", nil, nil)
+	if err == nil || err != coinbasepro.ErrNotFound {
+		t.Fatal("should have thrown 404 error")
 	}
 }

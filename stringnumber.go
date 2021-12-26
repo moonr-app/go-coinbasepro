@@ -24,7 +24,7 @@ func (s *StringNumber) UnmarshalJSON(data []byte) error {
 	case string:
 		*s = StringNumber(v)
 	default:
-		return errors.New("Not an int or string")
+		return errors.New("not an int or string")
 	}
 
 	return nil

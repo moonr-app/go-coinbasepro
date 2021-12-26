@@ -9,6 +9,7 @@ import (
 func WithSandboxEnvironment() option {
 	return func(c *client) error {
 		c.baseURL = baseURLSandbox
+		c.websocketURL = websocketURLSandbox
 		return nil
 	}
 }

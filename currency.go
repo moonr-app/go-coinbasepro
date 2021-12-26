@@ -1,7 +1,9 @@
 package coinbasepro
 
 import (
+	"context"
 	"fmt"
+	"net/http"
 )
 
 type Currency struct {
@@ -10,10 +12,10 @@ type Currency struct {
 	MinSize string `json:"min_size"`
 }
 
-func (c *client) GetCurrencies() ([]Currency, error) {
+func (c *client) GetCurrencies(ctx context.Context) ([]Currency, error) {
 	var currencies []Currency
 
 	url := fmt.Sprintf("/currencies")
-	_, err := c.Request("GET", url, nil, &currencies)
+	_, err := c.Request(ctx, http.MethodGet, url, nil, &currencies)
 	return currencies, err
 }

@@ -2,6 +2,7 @@ package coinbasepro
 
 import (
 	"fmt"
+	"net/http"
 )
 
 type Fill struct {
@@ -32,6 +33,5 @@ func (c *client) ListFills(p ListFillsParams) *Cursor {
 		paginationParams.AddExtraParam("product_id", p.ProductID)
 	}
 
-	return NewCursor(c, "GET", fmt.Sprintf("/fills"),
-		&paginationParams)
+	return c.newCursor(http.MethodGet, fmt.Sprintf("/fills"), paginationParams)
 }

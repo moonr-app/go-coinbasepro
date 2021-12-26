@@ -1,55 +1,55 @@
 package coinbasepro
 
 import (
+	"context"
 	"fmt"
 )
 
 type Cursor struct {
-	Client     *client
-	Pagination *PaginationParams
-	Method     string
-	Params     interface{}
-	URL        string
+	client     *client
+	pagination PaginationParams
+	method     string
+	params     interface{}
+	url        string
 	HasMore    bool
 }
 
-func NewCursor(client *client, method, url string,
-	paginationParams *PaginationParams) *Cursor {
+func (c *client) newCursor(method, url string, paginationParams PaginationParams) *Cursor {
 	return &Cursor{
-		Client:     client,
-		Method:     method,
-		URL:        url,
-		Pagination: paginationParams,
+		client:     c,
+		method:     method,
+		url:        url,
+		pagination: paginationParams,
 		HasMore:    true,
 	}
 }
 
-func (c *Cursor) Page(i interface{}, direction string) error {
-	url := c.URL
-	if c.Pagination.Encode(direction) != "" {
-		url = fmt.Sprintf("%s?%s", c.URL, c.Pagination.Encode(direction))
+func (c *Cursor) page(ctx context.Context, i interface{}, direction string) error {
+	url := c.url
+	if c.pagination.Encode(direction) != "" {
+		url = fmt.Sprintf("%s?%s", c.url, c.pagination.Encode(direction))
 	}
 
-	res, err := c.Client.Request(c.Method, url, c.Params, i)
+	res, err := c.client.Request(ctx, c.method, url, c.params, i)
 	if err != nil {
 		c.HasMore = false
 		return err
 	}
 
-	c.Pagination.Before = res.Header.Get("CB-BEFORE")
-	c.Pagination.After = res.Header.Get("CB-AFTER")
+	c.pagination.Before = res.Header.Get("CB-BEFORE")
+	c.pagination.After = res.Header.Get("CB-AFTER")
 
-	if c.Pagination.Done(direction) {
+	if c.pagination.Done(direction) {
 		c.HasMore = false
 	}
 
 	return nil
 }
 
-func (c *Cursor) NextPage(i interface{}) error {
-	return c.Page(i, "next")
+func (c *Cursor) NextPage(ctx context.Context, i interface{}) error {
+	return c.page(ctx, i, "next")
 }
 
-func (c *Cursor) PrevPage(i interface{}) error {
-	return c.Page(i, "prev")
+func (c *Cursor) PrevPage(ctx context.Context, i interface{}) error {
+	return c.page(ctx, i, "prev")
 }

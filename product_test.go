@@ -1,106 +1,109 @@
-package coinbasepro
+package coinbasepro_test
 
 import (
+	"context"
 	"errors"
 	"testing"
+
+	"github.com/preichenberger/go-coinbasepro/v2"
 )
 
 func TestGetProducts(t *testing.T) {
-	client := NewTestClient(t)
-	products, err := client.GetProducts()
+	client := coinbasepro.NewTestClient(t)
+	products, err := client.GetProducts(context.Background())
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	for _, p := range products {
-		if StructHasZeroValues(p) && p.StatusMessage != "" {
-			t.Error(errors.New("Zero value"))
+		if coinbasepro.StructHasZeroValues(p) && p.StatusMessage != "" {
+			t.Fatal("Zero value")
 		}
 	}
 }
 
 func TestGetBook(t *testing.T) {
-	client := NewTestClient(t)
-	_, err := client.GetBook("BTC-USD", 1)
+	client := coinbasepro.NewTestClient(t)
+	ctx := context.Background()
+	_, err := client.GetBook(ctx, "BTC-USD", 1)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
-	_, err = client.GetBook("BTC-USD", 2)
+	_, err = client.GetBook(ctx, "BTC-USD", 2)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
-	_, err = client.GetBook("BTC-USD", 3)
+	_, err = client.GetBook(ctx, "BTC-USD", 3)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 }
 
 func TestGetTicker(t *testing.T) {
-	client := NewTestClient(t)
-	ticker, err := client.GetTicker("BTC-USD")
+	client := coinbasepro.NewTestClient(t)
+	ctx := context.Background()
+	ticker, err := client.GetTicker(ctx, "BTC-USD")
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
-	if StructHasZeroValues(ticker) {
-		t.Error(errors.New("Zero value"))
+	if coinbasepro.StructHasZeroValues(ticker) {
+		t.Fatal("Zero value")
 	}
 
-	ticker, err = client.GetTicker("ETH-BTC")
+	ticker, err = client.GetTicker(ctx, "ETH-BTC")
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
-	if StructHasZeroValues(ticker) {
-		t.Error(errors.New("Zero value"))
+	if coinbasepro.StructHasZeroValues(ticker) {
+		t.Fatal(errors.New("Zero value"))
 	}
 
 }
 
 func TestListTrades(t *testing.T) {
-	var trades []Trade
-	client := NewTestClient(t)
-	cursor := client.ListTrades("BTC-USD")
+	var trades []coinbasepro.Trade
+	client := coinbasepro.NewTestClient(t)
+	cursor := client.ListTrades("BTC-USD", coinbasepro.ListTradesParams{})
 
-	if err := cursor.NextPage(&trades); err != nil {
-		t.Error(err)
+	if err := cursor.NextPage(context.Background(), &trades); err != nil {
+		t.Fatal(err)
 	}
 
 	for _, a := range trades {
-		if StructHasZeroValues(a) {
-			t.Error(errors.New("Zero value"))
+		if coinbasepro.StructHasZeroValues(a) {
+			t.Fatal(errors.New("Zero value"))
 		}
 	}
 }
 
 func TestGetHistoricRates(t *testing.T) {
-	// Disabled due to error on sandbox
-	return
-	client := NewTestClient(t)
-	params := GetHistoricRatesParams{
+	client := coinbasepro.NewTestClient(t)
+	params := coinbasepro.GetHistoricRatesParams{
 		Granularity: 3600,
 	}
 
-	historicRates, err := client.GetHistoricRates("BTC-USD", params)
+	historicRates, err := client.GetHistoricRates(context.Background(), "BTC-USD", params)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	props := []string{"Time", "Low", "High", "Open", "Close", "Volume"}
-	if err := EnsureProperties(historicRates[0], props); err != nil {
-		t.Error(err)
+	if err := coinbasepro.EnsureProperties(historicRates[0], props); err != nil {
+		t.Fatal(err)
 	}
 }
 
 func TestGetStats(t *testing.T) {
-	client := NewTestClient(t)
-	stats, err := client.GetStats("BTC-USD")
+	client := coinbasepro.NewTestClient(t)
+	stats, err := client.GetStats(context.Background(), "BTC-USD")
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	props := []string{"Low", "Open", "Volume", "Last", "Volume30Day"}
-	if err := EnsureProperties(stats, props); err != nil {
-		t.Error(err)
+	if err := coinbasepro.EnsureProperties(stats, props); err != nil {
+		t.Fatal(err)
 	}
 }

@@ -2,7 +2,9 @@ package coinbasepro
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math"
 	"net/http"
@@ -11,13 +13,16 @@ import (
 )
 
 const (
-	baseURLProduction = "https://api.pro.coinbase.com"
-	baseURLSandbox    = "https://api-public.sandbox.pro.coinbase.com"
+	baseURLProduction      = "https://api.exchange.coinbase.com"
+	baseURLSandbox         = "https://api-public.sandbox.exchange.coinbase.com"
+	websocketURLProduction = "wss://ws-feed.exchange.coinbase.com"
+	websocketURLSandbox    = "wss://ws-feed-public.sandbox.exchange.coinbase.com"
 )
 
 type (
 	client struct {
 		baseURL           string
+		websocketURL      string
 		secret            string
 		key               string
 		passphrase        string
@@ -30,8 +35,17 @@ type (
 )
 
 func NewClient(key, passphrase, secret string, opts ...option) (*client, error) {
+	switch {
+	case key == "":
+		return nil, errors.New("key cannot be empty")
+	case passphrase == "":
+		return nil, errors.New("passphrase cannot be empty")
+	case secret == "":
+		return nil, errors.New("secret cannot be empty")
+	}
 	c := &client{
 		baseURL:           baseURLProduction,
+		websocketURL:      websocketURLProduction,
 		key:               key,
 		passphrase:        passphrase,
 		secret:            secret,
@@ -50,13 +64,12 @@ func NewClient(key, passphrase, secret string, opts ...option) (*client, error) 
 	return c, nil
 }
 
-func (c *client) Request(method string, url string,
-	params, result interface{}) (res *http.Response, err error) {
+func (c *client) Request(ctx context.Context, method, url string, params, result interface{}) (res *http.Response, err error) {
 	for i := 0; i < c.retryCount+1; i++ {
 		retryDuration := time.Duration((math.Pow(2, float64(i))-1)/2) * c.retryInterval
 		time.Sleep(retryDuration)
 
-		res, err = c.request(method, url, params, result)
+		res, err = c.request(ctx, method, url, params, result)
 		if res != nil && res.StatusCode == 429 {
 			continue
 		}
@@ -67,23 +80,23 @@ func (c *client) Request(method string, url string,
 	return res, err
 }
 
-func (c *client) request(method string, url string, params, result interface{}) (res *http.Response, err error) {
+func (c *client) request(ctx context.Context, method, url string, params, result interface{}) (res *http.Response, err error) {
 	var data []byte
 	body := bytes.NewReader(make([]byte, 0))
 
 	if params != nil {
 		data, err = json.Marshal(params)
 		if err != nil {
-			return res, err
+			return res, fmt.Errorf("failed to marshal request: %w", err)
 		}
 
 		body = bytes.NewReader(data)
 	}
 
 	fullURL := fmt.Sprintf("%s%s", c.baseURL, url)
-	req, err := http.NewRequest(method, fullURL, body)
+	req, err := http.NewRequestWithContext(ctx, method, fullURL, body)
 	if err != nil {
-		return res, err
+		return res, fmt.Errorf("failed to create new request: %w", err)
 	}
 
 	timestamp := strconv.FormatInt(time.Now().Unix()+int64(c.timeOffsetSeconds), 10)
@@ -94,7 +107,7 @@ func (c *client) request(method string, url string, params, result interface{}) 
 
 	h, err := c.Headers(method, url, timestamp, string(data))
 	if err != nil {
-		return res, err
+		return res, fmt.Errorf("failed to generate request headers: %w", err)
 	}
 
 	for k, v := range h {
@@ -103,24 +116,24 @@ func (c *client) request(method string, url string, params, result interface{}) 
 
 	res, err = c.httpClient.Do(req)
 	if err != nil {
-		return res, err
+		return res, fmt.Errorf("failed to do request: %w", err)
 	}
 	defer res.Body.Close()
 
 	if res.StatusCode != 200 {
-		coinbaseError := Error{}
+		coinbaseErr := Error{}
 		decoder := json.NewDecoder(res.Body)
-		if err := decoder.Decode(&coinbaseError); err != nil {
-			return res, err
+		if err := decoder.Decode(&coinbaseErr); err != nil {
+			return res, fmt.Errorf("failed to decode error response: %w", err)
 		}
 
-		return res, error(coinbaseError)
+		return res, coinbaseErr
 	}
 
 	if result != nil {
 		decoder := json.NewDecoder(res.Body)
 		if err = decoder.Decode(result); err != nil {
-			return res, err
+			return res, fmt.Errorf("failed to decode response body: %w", err)
 		}
 	}
 
@@ -144,7 +157,7 @@ func (c *client) Headers(method, url, timestamp, data string) (map[string]string
 
 	sig, err := generateSig(message, c.secret)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to generate signature: %w", err)
 	}
 	h["CB-ACCESS-SIGN"] = sig
 	return h, nil

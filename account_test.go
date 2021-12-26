@@ -1,68 +1,72 @@
-package coinbasepro
+package coinbasepro_test
 
 import (
-	"errors"
+	"context"
 	"testing"
+
+	"github.com/preichenberger/go-coinbasepro/v2"
 )
 
 func TestGetAccounts(t *testing.T) {
-	client := NewTestClient(t)
-	accounts, err := client.GetAccounts()
+	client := coinbasepro.NewTestClient(t)
+	accounts, err := client.GetAccounts(context.Background())
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	// Check for decoding issues
 	for _, a := range accounts {
-		if StructHasZeroValues(a) {
-			t.Error(errors.New("Zero value"))
+		if coinbasepro.StructHasZeroValues(a) {
+			t.Fatal("Zero value")
 		}
 	}
 }
 
 func TestGetAccount(t *testing.T) {
-	client := NewTestClient(t)
-	accounts, err := client.GetAccounts()
+	client := coinbasepro.NewTestClient(t)
+	ctx := context.Background()
+	accounts, err := client.GetAccounts(ctx)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	for _, a := range accounts {
-		account, err := client.GetAccount(a.ID)
+		account, err := client.GetAccount(ctx, a.ID)
 		if err != nil {
-			t.Error(err)
+			t.Fatal(err)
 		}
 
 		// Check for decoding issues
-		if StructHasZeroValues(account) {
-			t.Error(errors.New("Zero value"))
+		if coinbasepro.StructHasZeroValues(account) {
+			t.Fatal("Zero value")
 		}
 	}
 }
 func TestListAccountLedger(t *testing.T) {
-	var ledgers []LedgerEntry
-	client := NewTestClient(t)
-	accounts, err := client.GetAccounts()
+	var ledgers []coinbasepro.LedgerEntry
+	client := coinbasepro.NewTestClient(t)
+	ctx := context.Background()
+	accounts, err := client.GetAccounts(ctx)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	for _, a := range accounts {
 		cursor := client.ListAccountLedger(a.ID)
 		for cursor.HasMore {
-			if err := cursor.NextPage(&ledgers); err != nil {
-				t.Error(err)
+			if err := cursor.NextPage(ctx, &ledgers); err != nil {
+				t.Fatal(err)
 			}
 
 			for _, ledger := range ledgers {
 				props := []string{"ID", "CreatedAt", "Amount", "Balance", "Type"}
-				if err := EnsureProperties(ledger, props); err != nil {
-					t.Error(err)
+				if err := coinbasepro.EnsureProperties(ledger, props); err != nil {
+					t.Fatal(err)
 				}
 
 				if ledger.Type == "match" || ledger.Type == "fee" {
-					if err := Ensure(ledger.Details); err != nil {
-						t.Error(errors.New("Details is missing"))
+					if err := coinbasepro.Ensure(ledger.Details); err != nil {
+						t.Fatal("Details is missing")
 					}
 				}
 			}
@@ -71,24 +75,26 @@ func TestListAccountLedger(t *testing.T) {
 }
 
 func TestListHolds(t *testing.T) {
-	var holds []Hold
-	client := NewTestClient(t)
-	accounts, err := client.GetAccounts()
+	var holds []coinbasepro.Hold
+	client := coinbasepro.NewTestClient(t)
+	ctx := context.Background()
+
+	accounts, err := client.GetAccounts(ctx)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	for _, a := range accounts {
 		cursor := client.ListHolds(a.ID)
 		for cursor.HasMore {
-			if err := cursor.NextPage(&holds); err != nil {
-				t.Error(err)
+			if err := cursor.NextPage(ctx, &holds); err != nil {
+				t.Fatal(err)
 			}
 
 			for _, h := range holds {
 				// Check for decoding issues
-				if StructHasZeroValues(h) {
-					t.Error(errors.New("Zero value"))
+				if coinbasepro.StructHasZeroValues(h) {
+					t.Fatal("Zero value")
 				}
 			}
 		}

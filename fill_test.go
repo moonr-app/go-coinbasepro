@@ -1,25 +1,27 @@
-package coinbasepro
+package coinbasepro_test
 
 import (
-	"errors"
+	"context"
 	"testing"
+
+	"github.com/preichenberger/go-coinbasepro/v2"
 )
 
 func TestListFills(t *testing.T) {
-	var fills []Fill
-	client := NewTestClient(t)
-	params := ListFillsParams{
+	var fills []coinbasepro.Fill
+	client := coinbasepro.NewTestClient(t)
+	params := coinbasepro.ListFillsParams{
 		ProductID: "BTC-USD",
 	}
 	cursor := client.ListFills(params)
 	for cursor.HasMore {
-		if err := cursor.NextPage(&fills); err != nil {
-			t.Error(err)
+		if err := cursor.NextPage(context.Background(), &fills); err != nil {
+			t.Fatal(err)
 		}
 
 		for _, f := range fills {
-			if StructHasZeroValues(f) {
-				t.Error(errors.New("Zero value"))
+			if coinbasepro.StructHasZeroValues(f) {
+				t.Fatal("Zero value")
 			}
 		}
 	}

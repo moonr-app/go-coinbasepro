@@ -1,7 +1,9 @@
 package coinbasepro
 
 import (
+	"context"
 	"fmt"
+	"net/http"
 )
 
 type Fees struct {
@@ -10,10 +12,10 @@ type Fees struct {
 	USDVolume    string `json:"usd_volume"`
 }
 
-func (c *client) GetFees() (Fees, error) {
+func (c *client) GetFees(ctx context.Context) (Fees, error) {
 	var fees Fees
 
 	url := fmt.Sprintf("/fees")
-	_, err := c.Request("GET", url, nil, &fees)
+	_, err := c.Request(ctx, http.MethodGet, url, nil, &fees)
 	return fees, err
 }

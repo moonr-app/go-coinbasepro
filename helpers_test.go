@@ -2,6 +2,7 @@ package coinbasepro
 
 import (
 	"fmt"
+	"os"
 	"reflect"
 	"testing"
 
@@ -9,18 +10,18 @@ import (
 )
 
 func NewTestClient(t *testing.T) *client {
-	client, err := NewClient(
-		"",
-		"",
-		"",
+	c, err := NewClient(
+		os.Getenv("COINBASE_PRO_KEY"),
+		os.Getenv("COINBASE_PRO_PASSPHRASE"),
+		os.Getenv("COINBASE_PRO_SECRET"),
 		WithSandboxEnvironment(),
 		WithRetryCount(2),
 	)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
-	return client
+	return c
 }
 
 func NewTestWebsocketClient() (*ws.Conn, error) {
@@ -32,8 +33,6 @@ func NewTestWebsocketClient() (*ws.Conn, error) {
 
 func StructHasZeroValues(i interface{}) bool {
 	iv := reflect.ValueOf(i)
-
-	//values := make([]interface{}, v.NumField())
 
 	for i := 0; i < iv.NumField(); i++ {
 		field := iv.Field(i)

@@ -1,8 +1,15 @@
 package coinbasepro
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
+	"fmt"
+
+	ws "github.com/gorilla/websocket"
 )
+
+var ErrCloseWebsocket = errors.New("close webscoket connection")
 
 type Message struct {
 	Type          string           `json:"type"`
@@ -63,6 +70,37 @@ type SignedMessage struct {
 	Passphrase string `json:"passphrase"`
 	Timestamp  string `json:"timestamp"`
 	Signature  string `json:"signature"`
+}
+
+func (c *client) Subscribe(ctx context.Context, message Message, handler func(Message) error) error {
+	var wsDialer ws.Dialer
+	wsConn, _, err := wsDialer.DialContext(ctx, c.websocketURL, nil)
+	if err != nil {
+		return fmt.Errorf("failed to connect to websocket: %w", err)
+	}
+	defer wsConn.Close()
+
+	if err := wsConn.WriteJSON(message); err != nil {
+		return fmt.Errorf("failed to write message: %w", err)
+	}
+
+	for {
+		var receivedMessage Message
+		if err := wsConn.ReadJSON(&receivedMessage); err != nil {
+			return fmt.Errorf("failed to read message: %w", err)
+		}
+
+		err := handler(receivedMessage)
+		if err == nil {
+			continue
+		}
+
+		if !errors.Is(err, ErrCloseWebsocket) {
+			return fmt.Errorf("failed to handle message: %w", err)
+		}
+
+		return nil
+	}
 }
 
 func (e *SnapshotEntry) UnmarshalJSON(data []byte) error {

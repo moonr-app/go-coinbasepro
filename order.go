@@ -1,7 +1,9 @@
 package coinbasepro
 
 import (
+	"context"
 	"fmt"
+	"net/http"
 )
 
 type Order struct {
@@ -43,7 +45,7 @@ type ListOrdersParams struct {
 	Pagination PaginationParams
 }
 
-func (c *client) CreateOrder(newOrder *Order) (Order, error) {
+func (c *client) CreateOrder(ctx context.Context, newOrder Order) (Order, error) {
 	var savedOrder Order
 
 	if len(newOrder.Type) == 0 {
@@ -51,48 +53,46 @@ func (c *client) CreateOrder(newOrder *Order) (Order, error) {
 	}
 
 	url := fmt.Sprintf("/orders")
-	_, err := c.Request("POST", url, newOrder, &savedOrder)
+	_, err := c.Request(ctx, http.MethodPost, url, newOrder, &savedOrder)
 	return savedOrder, err
 }
 
-func (c *client) CancelOrder(id string) error {
+func (c *client) CancelOrder(ctx context.Context, id string) error {
 	url := fmt.Sprintf("/orders/%s", id)
-	_, err := c.Request("DELETE", url, nil, nil)
+	_, err := c.Request(ctx, http.MethodDelete, url, nil, nil)
 	return err
 }
 
-func (c *client) CancelAllOrders(p ...CancelAllOrdersParams) ([]string, error) {
+func (c *client) CancelAllOrders(ctx context.Context, p CancelAllOrdersParams) ([]string, error) {
 	var orderIDs []string
 	url := "/orders"
 
-	if len(p) > 0 && p[0].ProductID != "" {
-		url = fmt.Sprintf("%s?product_id=%s", url, p[0].ProductID)
+	if p.ProductID != "" {
+		url = fmt.Sprintf("%s?product_id=%s", url, p.ProductID)
 	}
 
-	_, err := c.Request("DELETE", url, nil, &orderIDs)
+	_, err := c.Request(ctx, http.MethodDelete, url, nil, &orderIDs)
 	return orderIDs, err
 }
 
-func (c *client) GetOrder(id string) (Order, error) {
+func (c *client) GetOrder(ctx context.Context, id string) (Order, error) {
 	var savedOrder Order
 
 	url := fmt.Sprintf("/orders/%s", id)
-	_, err := c.Request("GET", url, nil, &savedOrder)
+	_, err := c.Request(ctx, http.MethodGet, url, nil, &savedOrder)
 	return savedOrder, err
 }
 
-func (c *client) ListOrders(p ...ListOrdersParams) *Cursor {
+func (c *client) ListOrders(p ListOrdersParams) *Cursor {
 	paginationParams := PaginationParams{}
-	if len(p) > 0 {
-		paginationParams = p[0].Pagination
-		if p[0].Status != "" {
-			paginationParams.AddExtraParam("status", p[0].Status)
-		}
-		if p[0].ProductID != "" {
-			paginationParams.AddExtraParam("product_id", p[0].ProductID)
-		}
+	paginationParams = p.Pagination
+
+	if p.Status != "" {
+		paginationParams.AddExtraParam("status", p.Status)
+	}
+	if p.ProductID != "" {
+		paginationParams.AddExtraParam("product_id", p.ProductID)
 	}
 
-	return NewCursor(c, "GET", fmt.Sprintf("/orders"),
-		&paginationParams)
+	return c.newCursor(http.MethodGet, fmt.Sprintf("/orders"), paginationParams)
 }
