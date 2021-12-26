@@ -205,6 +205,13 @@ func (c *client) GetProducts(ctx context.Context) ([]Product, error) {
 	return products, err
 }
 
+func (c *client) GetProduct(ctx context.Context, p string) (Product, error) {
+	var product Product
+	requestURL := fmt.Sprintf("/products/%s", p)
+	_, err := c.Request(ctx, http.MethodGet, requestURL, nil, &product)
+	return product, err
+}
+
 func (c *client) GetHistoricRates(ctx context.Context, product string, p GetHistoricRatesParams) ([]HistoricRate, error) {
 	var historicRates []HistoricRate
 	requestURL := fmt.Sprintf("/products/%s/candles", product)
