@@ -3,7 +3,7 @@ Go Coinbase Pro [![GoDoc](http://img.shields.io/badge/godoc-reference-blue.svg)]
 
 ## Summary
 
-Go client for [CoinBase Pro](https://pro.coinbase.com) formerly known as gdax
+Go client for [Coinbase Pro](https://pro.coinbase.com) formerly known as gdax
 
 ## Installation
 If using Go modules (Go version >= 11.1) simply import as needed.
@@ -36,41 +36,43 @@ import (
   coinbasepro "github.com/moonr-app/go-coinbasepro"
 )
 
-client := coinbasepro.NewClient()
+client, err := coinbasepro.NewClient(
+    "coinbase pro key",
+    "coinbase pro passphrase",
+    "coinbase pro secret",
+)
+if err != nil {
+    // handle error
+}
 
-// optional, configuration can be updated with ClientConfig
-client.UpdateConfig(&coinbasepro.ClientConfig{
-  BaseURL: "https://api.pro.coinbase.com",
-  Key: "coinbase pro key",
-  Passphrase: "coinbase pro passphrase",
-  Secret: "coinbase pro secret",
-})
+// optional configuration can be provided using function options:
+client, err := coinbasepro.NewClient(
+    "coinbase pro key",
+    "coinbase pro passphrase",
+    "coinbase pro secret",
+    coinbasepro.WithSandboxEnvironment(),
+    coinbasepro.WithHTTPClient(&http.Client{}),
+    coinbasepro.WithRetryCount(5),
+    coinbasepro.WithRetryInterval(time.Second),
+    coinbasepro.WithTimeOffsetSeconds(30),
+)
+if err != nil {
+    // handle error
+}
 ```
 
 ### Sandbox
-You can switch to the sandbox URL by setting environment variable: COINBASE_PRO_SANDBOX
+You can switch to the sandbox env by using the following functional option (will default to production if not provided):
 
-Enable sandbox
 ```sh
-export COINBASE_PRO_SANDBOX=1
-```
-
-Disable sandbox
-```sh
-export COINBASE_PRO_SANDBOX=0
+coinbasepro.WithSandboxEnvironment()
 ```
 
 
 ### HTTP Settings
+You can use a custom http client by using the following functional option:
 ```go
-import (
-  "net/http"
-  "time"
-)
-
-client.HTTPClient = &http.Client {
-  Timeout: 15 * time.Second,
-}
+coinbasepro.WithHTTPClient(&http.Client{}),
 ```
 
 ### Decimals
@@ -109,9 +111,15 @@ println(savedOrder.ID)
 ```
 
 ### Retry
-You can set a retry count which uses exponential backoff: (2^(retry_attempt) - 1) / 2 * 1000 * milliseconds
+You can set a retry count & interval which uses exponential backoff using functional options:
+
+`(2^(retry_attempt) - 1) / 2 * retryInterval`
+
 ```
-client.RetryCount = 3 # 500ms, 1500ms, 3500ms
+coinbasepro.WithRetryCount(3),
+coinbasepro.WithRetryInterval(500 * time.Millisecond),
+
+// retry count = 3: 500ms, 1500ms, 3500ms
 ```
 
 ### Cursor
@@ -122,7 +130,7 @@ var orders []coinbasepro.Order
 cursor = client.ListOrders()
 
 for cursor.HasMore {
-  if err := cursor.NextPage(&orders); err != nil {
+  if err := cursor.NextPage(ctx, &orders); err != nil {
     println(err.Error())
     return
   }
@@ -138,14 +146,13 @@ for cursor.HasMore {
 Listen for websocket messages
 
 ```go
-  import(
-    ws "github.com/gorilla/websocket"
+  client, err := coinbasepro.NewClient(
+    "coinbase pro key", 
+	"coinbase pro passphrase", 
+	"coinbase pro secret",
   )
-
-  var wsDialer ws.Dialer
-  wsConn, _, err := wsDialer.Dial("wss://ws-feed.pro.coinbase.com", nil)
-  if err != nil {
-    println(err.Error())
+  if err != nil { 
+    // handle error
   }
 
   subscribe := coinbasepro.Message{
@@ -165,20 +172,11 @@ Listen for websocket messages
       },
     },
   }
-  if err := wsConn.WriteJSON(subscribe); err != nil {
-    println(err.Error())
-  }
-
-  for true {
-    message := coinbasepro.Message{}
-    if err := wsConn.ReadJSON(&message); err != nil {
-      println(err.Error())
-      break
-    }
-
+  
+  err := client.Subscribe(ctx, subscribe, func(msg coinbasepro.Message) error {
     println(message.Type)
-  }
-
+    return nil
+  })
 ```
 
 ### Time
@@ -199,7 +197,7 @@ This library supports all public and private endpoints
 
 Get Accounts:
 ```go
-  accounts, err := client.GetAccounts()
+  accounts, err := client.GetAccounts(ctx)
   if err != nil {
     println(err.Error())
   }
@@ -213,7 +211,7 @@ List Account Ledger:
 ```go
   var ledgers []coinbasepro.LedgerEntry
 
-  accounts, err := client.GetAccounts()
+  accounts, err := client.GetAccounts(ctx)
   if err != nil {
     println(err.Error())
   }
@@ -221,7 +219,7 @@ List Account Ledger:
   for _, a := range accounts {
     cursor := client.ListAccountLedger(a.ID)
     for cursor.HasMore {
-      if err := cursor.NextPage(&ledgers); err != nil {
+      if err := cursor.NextPage(ctx, &ledgers); err != nil {
         println(err.Error())
       }
 
@@ -241,7 +239,7 @@ Create an Order:
     ProductID: "BTC-USD",
   }
 
-  savedOrder, err := client.CreateOrder(&order)
+  savedOrder, err := client.CreateOrder(ctx, order)
   if err != nil {
     println(err.Error())
   }
@@ -256,7 +254,7 @@ Transfer funds:
     Amount: "1.00",
   }
 
-  savedTransfer, err := client.CreateTransfer(&transfer)
+  savedTransfer, err := client.CreateTransfer(ctx, transfer)
   if err != nil {
     println(err.Error())
   }
@@ -268,7 +266,7 @@ Get Trade history:
   cursor := client.ListTrades("BTC-USD")
 
   for cursor.HasMore {
-    if err := cursor.NextPage(&trades); err != nil {
+    if err := cursor.NextPage(ctx, &trades); err != nil {
       for _, t := range trades {
         println(trade.CoinbaseID)
       }
