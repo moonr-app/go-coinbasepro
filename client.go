@@ -31,10 +31,31 @@ type (
 		retryInterval     time.Duration
 		timeOffsetSeconds int
 	}
-	option func(*client) error
+	ClientOption func(*client) error
 )
 
-func NewClient(key, passphrase, secret string, opts ...option) (*client, error) {
+// NewAnonymousClient creates a new instance of client without any credentials which can be used for public endpoints.
+func NewAnonymousClient(opts ...ClientOption) (*client, error) {
+	c := &client{
+		baseURL:           baseURLProduction,
+		websocketURL:      websocketURLProduction,
+		httpClient:        &http.Client{Timeout: 15 * time.Second},
+		retryCount:        0,
+		retryInterval:     100 * time.Millisecond,
+		timeOffsetSeconds: 0,
+	}
+
+	for _, opt := range opts {
+		if err := opt(c); err != nil {
+			return nil, err
+		}
+	}
+
+	return c, nil
+}
+
+// NewClient creates a new instance of client with credentials which can be used for both public & private endpoints.
+func NewClient(key, passphrase, secret string, opts ...ClientOption) (*client, error) {
 	switch {
 	case key == "":
 		return nil, errors.New("key cannot be empty")

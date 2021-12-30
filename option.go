@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func WithSandboxEnvironment() option {
+func WithSandboxEnvironment() ClientOption {
 	return func(c *client) error {
 		c.baseURL = baseURLSandbox
 		c.websocketURL = websocketURLSandbox
@@ -14,7 +14,7 @@ func WithSandboxEnvironment() option {
 	}
 }
 
-func WithHTTPClient(httpClient *http.Client) option {
+func WithHTTPClient(httpClient *http.Client) ClientOption {
 	return func(c *client) error {
 		if httpClient == nil {
 			return errors.New("httpClient cannot be nil")
@@ -25,7 +25,7 @@ func WithHTTPClient(httpClient *http.Client) option {
 	}
 }
 
-func WithRetryCount(retryCount int) option {
+func WithRetryCount(retryCount int) ClientOption {
 	return func(c *client) error {
 		if retryCount < 0 {
 			return errors.New("retryCount cannot be less than 0")
@@ -36,7 +36,7 @@ func WithRetryCount(retryCount int) option {
 	}
 }
 
-func WithRetryInterval(retryInterval time.Duration) option {
+func WithRetryInterval(retryInterval time.Duration) ClientOption {
 	return func(c *client) error {
 		if retryInterval < 0 {
 			return errors.New("retryInterval cannot be less than 0")
@@ -49,7 +49,7 @@ func WithRetryInterval(retryInterval time.Duration) option {
 
 // WithTimeOffsetSeconds can be used to generate timestamps with offset to current time.
 // Coinbase Pro sandbox time has been off in the past.
-func WithTimeOffsetSeconds(offset int) option {
+func WithTimeOffsetSeconds(offset int) ClientOption {
 	return func(c *client) error {
 		c.timeOffsetSeconds = offset
 
